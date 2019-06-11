@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/bootstrap-theme.css" rel="stylesheet">
+    <link href="css/jquery-ui.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+    <link href="css/datatables.min.css" rel="stylesheet">
+    <link href="css/sweetalert2.css" rel="stylesheet">
+    <script src="js/jquery-2.1.4.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/jquery-ui.js"></script>
+    <script src="js/ie10-viewport-bug-workaround.js"></script>
+    <script src="js/ie-emulation-modes-warning.js"></script>
+    <script src="js/echarts.min.js"></script>
+    <script src="js/echarts-gl.min.js"></script>
+    <!-- Data table plugin -->
+    <script src="js/jquery.dataTables.min.js"></script>
+    <script src="js/dataTables.bootstrap.min.js"></script>
+    <script src="js/sweetalert.min.js"></script>
+    <title>查对象</title>
+</head>
+<body>
+<div class="container-fluid">
+
+    <div class="row" style="margin-bottom: 0px">
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <h5>画像主体：
+                                <select id="select-subject" class="form-control" style="width: 30%;display: inline"
+                                        onchange="changeSubject(this, 'normal')">
+                                    <option value="人口库">人口</option>
+                                    <option value="法人库">法人</option>
+                                    <option value="证照库">证照</option>
+                                    <option value="车辆库">车辆</option>
+                                </select>
+                                <button id="search-btn" class="btn btn-info search-btn" onclick="searchSubject()">
+                                    <span class="glyphicon glyphicon-search"></span>
+                                </button>
+                            </h5>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div id="labels-filter-div">
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div class="row" >
+                        <div class="col-md-12">
+                            <ul class="nav nav-tabs" id="table-name-list">
+                            </ul>
+                        </div>
+                    </div>
+
+
+                    <div class="row" id="detail-table-div">
+                        <div class="col-md-12">
+                            <table class="table table-bordered table-striped table-condensed table-hover" id="detail-table">
+                                <thead id="detail-table-thead">
+                                <tr></tr>
+                                </thead>
+                                <tbody id="detail-table-tbody" style="cursor: pointer">
+                                <tr></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="row" id="portrait-chart-div">
+                        <div class="col-md-12">
+                            <div class="panel panel-default">
+                                <div class="panel-heading">用户画像</div>
+                                <div class="panel-body">
+                                    <div id="portrait-chart" style="width: 100%;height: 600px;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+</div>
+
+<script src="search-subject.js"></script>
+<script type="text/javascript">
+    $(function () {
+
+        init();
+
+    })
+</script>
+</body>
+</html>

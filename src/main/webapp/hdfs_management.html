@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html ng-app="indexApp">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/bootstrap-theme.css" rel="stylesheet">
+    <link href="css/jquery-ui.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+    <link href="css/sweetalert2.css" rel="stylesheet">
+    <style>
+        .data-viewer {
+            font-family: "courier new", arial, sans-serif;
+            font-size: 12px;
+        }
+
+        .focus {
+            background-color: #00AEAE;
+            color: #FFFFFF;
+        }
+    </style>
+
+    <script src="js/angular/1.6.3/angular.js"></script>
+    <script src="js/angular/1.6.3/angular-route.js"></script>
+    <script src="js/angular/1.6.3/angular-ui-router.js"></script>
+    <script src="js/angular/1.6.3/angular-file-upload.js"></script>
+    <script src="js/jquery-2.1.4.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/jquery-ui.js"></script>
+    <script src="js/sweetalert.min.js"></script>
+    <script src="js/ie10-viewport-bug-workaround.js"></script>
+    <script src="js/ie-emulation-modes-warning.js"></script>
+    <script src="js/echarts.js"></script>
+    <script src="js/echarts.min.js"></script>
+    <script src="js/echarts-gl.min.js"></script>
+    <script src="ng/indexApp.js"></script>
+    <script src="ng/hdfsManagementCtrl.js"></script>
+    <title>HDFS工具包</title>
+</head>
+<body ng-controller="hdfsManagementCtrl">
+<div class="container-fluid">
+    <h3 class="page-header" style="">HDFS管理
+        <a type="button"
+           class="btn btn-info btn-sm btn-block"
+           style="float: right; width: 10%"
+           href="data-computing.html">电影数据分析
+        </a>
+    </h3>
+
+    <!-- 任务列表 -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">HDFS列表</div>
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <input type="text" class="form-control" placeholder="目录地址" ng-model="searchParam"
+                                   style="width: 50%;display: inline;padding-bottom: 10px">
+                            <button class="btn btn-info search-btn" ng-click="searchTask()">
+                                <span class="glyphicon glyphicon-search"></span>
+                            </button>
+                        </div>
+                        <div class="col-md-2 col-md-offset-2">
+
+                            <button type="button" class="btn btn-sm btn-default btn-block"
+                                    ng-click="getAllTasks()" >
+                                <span class="glyphicon glyphicon-refresh" aria-hidden="true"></span>
+                            </button>
+                        </div>
+                    </div>
+                    <br>
+                    <div class="row">
+                        <div style="height:200px;overflow:auto;cursor:pointer">
+                            <table
+                                    class="table table-bordered table-striped table-condensed table-hover"
+                                    ng-init="getAllTasks()">
+                                <thead>
+                                <tr class="default">
+                                    <th>文件名</th>
+                                    <th>文件大小</th>
+                                    <th>修改时间</th>
+                                    <th>所有者</th>
+                                    <th>是否目录</th>
+                                    <th>权限</th>
+                                    <th colspan="2">操 作</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr ng-repeat="task in taskList" ng-click="showTaskInfo(task)">
+                                    <td ng-class='{focus: task.name==focus}'>{{task.name}}</td>
+                                    <td>{{task.size}}</td>
+                                    <td>{{task.modeifyDate}}</td>
+                                    <td>{{task.owner}}</td>
+                                    <td>{{task.isD}}</td>
+                                    <td>{{task.permission}}</td>
+                                    <td>
+                                        <button type="button"
+                                                ng-class="{false:'btn btn-xs btn-block btn-sm btn-info',true:'btn btn-xs btn-block btn-danger btn-sm'}[task.isD]"
+                                                ng-click="delTask(task)">查看
+                                        </button>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="row">
+
+
+                        <!--
+                        <div class="col-md-1">
+                            <div class="form-group form-group-sm">
+                                <button type="button" class="btn btn-sm btn-block btn-default"
+                                        ng-click="">
+                                    <span class="glyphicon glyphicon-time" aria-hidden="true"></span>
+                                </button>
+                            </div>
+                        </div>
+                        -->
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">任务信息</div>
+                <div class="panel-body">
+                <div class="col-md-6">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            内容
+                        </div>
+                        <div  style="height:200px;overflow:auto;cursor:pointer">
+                            <textarea style="border:0;border-radius:5px;background-color:rgba(241,241,241,.98);width: 580px;height: 195px;padding: 10px;resize: none;" ng-model="contents" placeholder="hdfs文件内容" maxlength="30"></textarea>
+                            </textarea>
+                        </div>
+                    </div>
+                    <div class="btn-sm">
+                        <button type="button"
+                                class="btn btn-info btn-sm"
+                                ng-click="wordCount()">字符统计
+                        </button>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            内容分析
+                        </div>
+                        <div  style="height:200px;overflow:auto;cursor:pointer">
+                            <textarea style="border:0;border-radius:5px;background-color:rgba(241,241,241,.98);width: 580px;height: 195px;padding: 10px;resize: none;" ng-model="count" placeholder="文件内容分析" maxlength="30"></textarea>
+                            </textarea>
+                        </div>
+                    </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">图解配置</div>
+                <div class="panel-body">
+                    <div class="col-md-6">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                统计
+                            </div>
+                            <div id="zcfzChart" style="width: 100%;height:410px;" ></div>
+                        </div>
+                        <div>
+                            <label
+                                   class="col-sm-2 control-label">K-means配置</label>
+                            <div class="col-md-3">
+                                <input type="text" class="form-control" id="currentTasktaskId"
+                                       placeholder="聚类中心" ng-model="kmeansCall.keys">
+                            </div>
+                            <div class="col-md-3">
+                                <input type="text" class="form-control" id="currentTaskname"
+                                       placeholder="迭代次数" ng-model="kmeansCall.iteration">
+                            </div>
+                            <div class="col-md-3">
+                                <button type="button"
+                                        class="btn btn-info btn-sm"
+                                        ng-click="Kmeans()">K-means分析
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                三维图解聚类
+                            </div>
+                            <div  style="height:410px;overflow:auto;cursor:pointer">
+                                <textarea style="border:0;border-radius:5px;background-color:rgba(241,241,241,.98);width: 580px;height: 405px;padding: 10px;resize: none;" ng-model="showData" placeholder="聚类结果" maxlength="30"></textarea>
+                                </textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">任务信息</div>
+                <div class="panel-body">
+                        <div class="form-group form-group-sm">
+                            <div class="col-md-offset-2 col-md-2">
+                                <select ng-model="selectedX"
+                                        ng-init="selectedX = '0'"
+                                        class="form-control" style="width: 100%;">
+                                    <option ng-repeat="x in dbInfoList" value="{{$index}}">{{x}}</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <select ng-model="selectedY"
+                                        ng-init="selectedY = '1'"
+                                        class="form-control" style="width: 100%;">
+                                    <option ng-repeat="x in dbInfoList" value="{{$index}}">{{x}}</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <select ng-model="selectedZ"
+                                        ng-init="selectedZ = '2'"
+                                        class="form-control" style="width: 100%;">
+                                    <option ng-repeat="x in dbInfoList" value="{{$index}}">{{x}}</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <button type="button" class="btn btn-sm btn-info"
+                                        ng-click="getNewChart()" >
+                                    查看任务输出
+                                </button>
+                            </div>
+                        </div>
+                </div>
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        内容
+                    </div>
+                        <div id="3DChart" style="width: 100%;height:500px;" ></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html ng-app="indexApp">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link href="css/bootstrap.min.css" rel="stylesheet">
+<link href="css/bootstrap-theme.css" rel="stylesheet">
+<link href="css/jquery-ui.css" rel="stylesheet">
+<link href="css/style.css" rel="stylesheet">
+<script src="js/angular/1.6.3/angular.js"></script>
+<script src="js/angular/1.6.3/angular-route.js"></script>
+<script src="js/angular/1.6.3/angular-ui-router.js"></script>
+<script src="js/angular/1.6.3/angular-file-upload.js"></script>
+<script src="js/jquery-2.1.4.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
+<script src="js/jquery-ui.js"></script>
+<script src="js/ie10-viewport-bug-workaround.js"></script>
+<script src="js/ie-emulation-modes-warning.js"></script>
+<script src="ng/indexApp.js"></script>
+<script src="ng/distributedClusteringCtrl.js"></script>
+<title>画像计算任务配置</title>
+</head>
+<body ng-controller="distributedClusteringCtrl">
+	<div class="container-fluid">
+		<h3 class="page-header">画像计算任务配置
+            <a type="button"
+               class="btn btn-info btn-sm btn-block"
+               style="float: right; width: 10%"
+               href="task-management.html">返回任务管理
+            </a>
+        </h3>
+
+		<div class="row">
+			<div class="col-sm-8 col-md-8">
+				<div class="alert alert-info alert-dismissible" role="alert">
+					<button type="button" class="close" data-dismiss="alert"
+						aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+					<strong>说 明</strong> 确定数据集路径和完成参数配置保存后才可以执行任务创建。
+				</div>
+			</div>
+		</div>
+
+		<div class="row">
+			<div class="col-sm-12 col-md-12">
+				<div class="panel panel-default" style="background-color: #2d5f8b">
+					<div class="panel-body">
+						<form class="form-horizontal">
+							<div class="form-group form-group-sm">
+								<div class="col-sm-4 col-md-4">
+									<input type="text" class="form-control" id="taskName"
+										placeholder="任务名称" ng-model="taskConfig.taskName">
+								</div>
+								<div class="col-sm-4 col-md-4">
+									<input type="text" class="form-control" id="taskId"
+										placeholder="任务ID 创建任务后自动生成" ng-model="taskConfig.taskId">
+								</div>
+								<div class="col-sm-4 col-md-4">
+									<input type="text" class="form-control" id="taskCreator"
+										placeholder="任务创建人" ng-model="taskConfig.creator">
+								</div>
+							</div>
+							<div class="form-group form-group-sm">
+								<div class="col-sm-10 col-md-10">
+									<textarea class="form-control" id="taskDescription" rows="2"
+										placeholder="任务描述" ng-model="taskConfig.description"></textarea>
+								</div>
+								<div class="col-sm-2 col-md-2">
+									<button type="button" class="btn btn-sm btn-block btn-success"
+										ng-click="createTask()"
+										ng-disabled="!(taskToken01 && taskToken02)">
+										创建任务 <span class="glyphicon glyphicon-send" aria-hidden="true"></span>
+									</button>
+								</div>
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="row">
+			<div class="col-sm-12 col-md-12">
+				<div class="panel panel-primary">
+					<div class="panel-heading">画像主体配置</div>
+					<div class="panel-body">
+
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="panel panel-default">
+                                    <div class="panel-heading">选择基础库</div>
+                                    <div class="panel-body">
+                                        <div class="row">
+
+                                            <div class="col-md-3">
+
+                                                <select ng-model="selectedDatabaseIndex" ng-init="selectedDatabaseIndex = '0'"
+                                                        class="form-control" style="width: 100%;">
+                                                    <option ng-repeat="x in dbInfoList" value="{{$index}}">{{x}}</option>
+                                                </select>
+
+                                            </div>
+                                            <div class="col-md-2">
+                                                <button type="button"
+                                                        class="btn btn-primary btn-sm btn-block"
+                                                        ng-click="connectMySQL();listMySQLTables()">连接基础库
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row" ng-show="mysqlDbInfoVisible">
+                            <div class="col-md-12">
+                                <div class="panel panel-default">
+                                    <div class="panel-heading">选择表</div>
+                                    <div class="panel-body">
+                                        <div class="row" >
+                                            <div class="col-md-12">
+                                                <ul class="nav nav-tabs">
+                                                    <li ng-repeat="(key, value) in tableMeta" ng-class="currentMySQLTable == key ? '' : 'active'"
+                                                    ng-if="value != '' && value != null">
+                                                        <a href ng-click="showTableInfo(key)">{{value}}</a>
+                                                    </li>
+                                                </ul>
+
+                                                <select ng-model="currentMySQLTable" ng-init="currentMySQLTable = 'pkh_sample'"
+                                                        class="form-control" style="width: 100%;">
+                                                    <option ng-repeat="(key, value) in tableMeta" value="{{key}}">{{value}}</option>
+                                                </select>
+
+
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <div class="table-responsive">
+                                                    <table class="table table-bordered table-condensed table-hover">
+                                                        <caption>数据表 {{currentMySQLTable}} 的数据样例</caption>
+                                                        <thead>
+                                                            <tr>
+                                                                <th>No</th>
+                                                                <th ng-repeat="(key, value) in currentMySQLTableColumnName"
+                                                                    ng-style="{'background-color':isSelected(key) ?'#aad3ff':''}"
+                                                                    style="min-width: 80px;max-width:300px;word-wrap: break-word">
+                                                                    {{currentMySQLTableColumnName[key]}}
+                                                                </th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <tr ng-repeat="item in mysqlTableSampleData">
+                                                                <td>{{$index+1}}</td>
+                                                                <td ng-repeat="(key, value) in currentMySQLTableColumnName"
+                                                                    ng-style="{'background-color':isSelected(key) ?'#aad3ff':''}"
+                                                                    style="min-width: 80px;max-width:300px;word-wrap: break-word">
+                                                                    {{item[key]|limitTo:10}}
+                                                                </td>
+                                                            </tr>
+                                                        <tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row" ng-show="mysqlDbTableInfoVisible">
+                            <div class="col-md-12">
+                                <div class="panel panel-default">
+                                    <div class="panel-heading">选择数据项</div>
+                                    <div class="panel-body">
+
+                                        <div class="row" >
+                                            <div class="col-md-12">
+                                                <div class="table-responsive">
+                                                    <table class="table table-bordered table-condensed table-hover">
+                                                        <caption>数据表 {{currentMySQLTable}} 的结构 </caption>
+                                                        <thead>
+                                                        <tr>
+                                                            <!--<th>No</th>-->
+                                                            <th></th>
+                                                            <th ng-repeat="(key, value) in currentMySQLTableColumnName"
+                                                                ng-style="{'background-color':isSelected(key) ?'#aad3ff':''}"
+                                                                style="white-space:nowrap">
+                                                                <input id="{{key}}" name="{{key}}" type="checkbox"
+                                                                       ng-checked="isSelected(key)" ng-click="updateSelection($event,key,'selected')"/>
+                                                                {{currentMySQLTableColumnName[key]}}
+                                                            </th>
+                                                        </tr>
+                                                        <!--
+                                                        <tr>
+                                                            <th>标识字段</th>
+                                                            <th ng-repeat="(key, value) in currentMySQLTableColumnName"
+                                                                style="white-space:nowrap">
+                                                                <input type="radio" name="primaryKey" ng-init="$index==0? initPrimaryKey(key) : ''"
+                                                                     ng-checked="$index==0"
+                                                                     ng-click="updateSelection($event,key,'primaryKey')"/>
+                                                            </th>
+
+                                                        </tr>
+                                                        -->
+                                                        </thead>
+                                                        <tbody>
+                                                        <tr>
+                                                            <td>字段名</td>
+                                                            <td ng-repeat="(key, value) in currentMySQLTableColumnName"
+                                                                ng-style="{'background-color':isSelected(key) ?'#aad3ff':''}">{{key}}</td>
+                                                        </tr>
+
+                                                        <tr>
+                                                            <td>列数据类型</td>
+                                                            <td ng-repeat="(key, value) in currentMySQLTableColumnName"
+                                                                ng-style="{'background-color':isSelected(key) ?'#aad3ff':''}">{{value}}</td>
+                                                        </tr>
+
+
+                                                        <tbody>
+
+                                                    </table>
+                                                </div>
+                                                <!--
+												<pre>{{selectedTagsString}}</pre>
+												<pre>{{selected|json}}</pre>
+												<pre>{{selectedTags|json}}</pre>
+												 -->
+                                            </div>
+
+
+                                        </div>
+
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class="row" ng-show="mysqlDbTableInfoVisible">
+                            <div class="col-md-12">
+                                <div class="panel panel-default">
+                                    <div class="panel-heading">导出自定义画像数据集</div>
+                                    <div class="panel-body">
+
+                                        <div class="form-group">
+
+                                            <textarea class="form-control" id="textarea-sql" rows="2"
+                                                      placeholder="数据库查询SQL语句，用于数据集的生成"
+                                                      ng-model="sqlStatement"
+                                                      ng-change="hideTables()" readonly="readonly"></textarea>
+                                        </div>
+                                        <div class="form-group">
+                                            <button type="button" class="btn btn-sm btn-primary"
+                                                    ng-click="getMySQLTableSampleDataBySQL()">
+                                                显示数据集样例
+                                            </button>
+                                        </div>
+
+                                        <div class="row" ng-show="sqlUserDefinedTableDataVisible">
+                                            <div class="col-sm-12 col-md-12">
+                                                <div class="table-responsive">
+                                                    <table class="table table-bordered table-condensed table-hover">
+                                                        <caption>基于自定义字段的数据表 {{currentMySQLTable}}
+                                                            的数据集样例
+                                                        </caption>
+
+                                                        <thead>
+                                                            <tr ng-if="selected.length != 0">
+                                                                <th ng-repeat="column in selected"
+                                                                    style="min-width: 80px;max-width:300px;word-wrap: break-word">
+                                                                    {{currentMySQLTableColumnName[column]}}
+                                                                </th>
+                                                            </tr>
+                                                            <tr ng-if="selected.length == 0">
+                                                                <th ng-repeat="(key, value) in currentMySQLTableColumnName"
+                                                                    style="min-width: 80px;max-width:300px;word-wrap: break-word">
+                                                                    {{currentMySQLTableColumnName[key]}}
+                                                                </th>
+                                                            </tr>
+                                                        </thead>
+
+                                                        <tbody>
+                                                            <tr ng-repeat="item in mysqlTableSampleDataBySQL">
+                                                                <td ng-repeat="(key, value) in item"
+                                                                    style="min-width: 80px;max-width:300px;word-wrap: break-word">
+                                                                    {{value|limitTo:10}}
+                                                                </td>
+                                                            </tr>
+                                                        <tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="row" ng-show="sqlUserDefinedTableDataVisible" style="margin-top: 20px">
+                                            <div class="col-sm-12 col-md-12">
+
+                                                <div class="form-group form-group-sm">
+                                                    <label for="input-data-topic">设置数据集的画像主题</label>
+                                                    <input
+                                                            type="text" class="form-control"
+                                                            id="input-data-topic"
+                                                            placeholder="用于经济状况画像"
+                                                            ng-model="purposeForData">
+                                                </div>
+
+                                                <div class="form-group">
+                                                    <button type="button" class="btn btn-sm btn-primary"
+                                                            ng-disabled="btnExportDataToHDFSDisable"
+                                                            ng-click="exportMySQLTableDataToHDFS()">
+                                                        导出至计算集群
+                                                    </button>
+                                                    <button type="button" class="btn btn-sm btn-default"
+                                                            ng-click="getOutputProgress(datasetPath)">
+                                                        查询进度
+                                                    </button>
+                                                </div>
+
+                                                <div class="progress" ng-show="progressBarVisible">
+                                                    <div class="progress-bar progress-bar-success"
+                                                         role="progressbar" aria-valuenow="60"
+                                                         aria-valuemin="0" aria-valuemax="100"
+                                                         style="width: 0%;"
+                                                         ng-style="{width: progressBarValue + '%'}">
+                                                        {{progressStatus}}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+
+<!--
+                        <div class="row">
+
+
+                            <div class="col-md-12">
+                                <div class="panel panel-default">
+                                    <div class="panel-heading">准备数据集</div>
+                                    <div class="panel-body">
+                                        <div class="row">
+
+											<div class="col-md-3">
+												<div class="form-group">
+													<input type="text" class="form-control input-sm"
+														id="mysqlConfig-ip" placeholder="ip"
+														ng-model="mysqlConfig.ip">
+												</div>
+											</div>
+											<div class="col-md-1">
+												<div class="form-group">
+													<input type="text" class="form-control input-sm"
+														id="mysqlConfig-port" placeholder="port"
+														ng-model="mysqlConfig.port">
+												</div>
+
+											</div>
+
+                                            <div class="col-md-2">
+                                                <div class="form-group">
+                                                    <input type="text" class="form-control input-sm"
+                                                           id="mysqlConfig-db" placeholder="db"
+                                                           ng-model="mysqlConfig.dbName">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <div class="form-group">
+                                                    <input type="text" class="form-control input-sm"
+                                                           id="mysqlConfig-username" placeholder="username"
+                                                           ng-model="mysqlConfig.username">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <div class="form-group">
+                                                    <input type="password" class="form-control input-sm"
+                                                           id="mysqlConfig-password" placeholder="password"
+                                                           ng-model="mysqlConfig.password">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <button type="button"
+                                                        class="btn btn-default btn-sm btn-block"
+                                                        ng-click="connectMySQL();listMySQLTables()">连接数据源
+                                                </button>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <button type="button"
+                                                        class="btn btn-default btn-sm btn-block"
+                                                        ng-click="disconnectMySQL()">关闭数据源
+                                                </button>
+                                            </div>
+                                        </div>
+
+
+										<div class="row">
+											<div class="col-md-6">
+												<div class="form-group">
+													<label for="name">日 志</label>
+													<textarea class="form-control" rows="2">{{logForConnection}}</textarea>
+												</div>
+											</div>
+										</div>
+
+
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+-->
+
+                        <div class="row">
+							<div class="col-sm-12 col-md-12">
+								<form class="form-horizontal">
+									<label for="hdfs">画像计算数据路径</label>
+									<div class="form-group form-group-sm">
+										<div class="col-sm-10 col-md-10">
+											<div class="input-group">
+												<span class="input-group-addon" id="hdfs">分布式文件系统</span> <input
+													type="text" class="form-control" placeholder="hdfs://"
+													ng-model="taskConfig.datasetPath" aria-describedby="hdfs">
+											</div>
+										</div>
+										<div class="col-sm-2 col-md-2">
+											<button type="button"
+												class="btn btn-sm btn-success btn-block"
+												ng-click="saveDatasetPath()">确 定</button>
+										</div>
+									</div>
+								</form>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="row">
+			<div class="col-sm-12 col-md-12">
+				<div class="panel panel-primary">
+					<div class="panel-heading">参数配置</div>
+					<div class="panel-body">
+						<form class="form-horizontal">
+							<div class="form-group form-group-sm">
+								<div class="col-sm-6 col-md-6">
+									<div class="input-group">
+										<span class="input-group-addon" id="kK">分组数</span> <input
+											type="text" class="form-control" placeholder="kK"
+											ng-model="taskConfig.kK" aria-describedby="kK">
+									</div>
+								</div>
+
+								<div class="col-sm-6 col-md-6">
+									<div class="input-group">
+										<span class="input-group-addon" id="kMeasure">距离测度</span> <input
+											type="text" class="form-control" placeholder="kMeasure"
+											ng-model="taskConfig.kMeasure" aria-describedby="kMeasure">
+									</div>
+								</div>
+							</div>
+							<div class="form-group form-group-sm">
+								<div class="col-sm-6 col-md-6">
+									<div class="input-group">
+										<span class="input-group-addon" id="kConvergenceDelta">收敛阈值</span>
+										<input type="text" class="form-control"
+											placeholder="kConvergenceDelta"
+											ng-model="taskConfig.kConvergenceDelta"
+											aria-describedby="kConvergenceDelta">
+									</div>
+								</div>
+								<div class="col-sm-6 col-md-6">
+									<div class="input-group">
+										<span class="input-group-addon" id="kMaxIterations">最大迭代次数</span>
+										<input type="text" class="form-control"
+											placeholder="kMaxIterations"
+											ng-model="taskConfig.kMaxIterations"
+											aria-describedby="kMaxIterations">
+									</div>
+								</div>
+							</div>
+							<div class="form-group form-group-sm">
+								<div class="col-sm-6 col-md-6">
+									<div class="input-group">
+										<span class="input-group-addon" id="kClassificationThreshold">分类阈值</span>
+										<input type="text" class="form-control"
+											placeholder="kClassificationThreshold"
+											ng-model="taskConfig.kClassificationThreshold"
+											aria-describedby="kClassificationThreshold">
+									</div>
+								</div>
+							</div>
+						</form>
+						<div class="row">
+							<div class="col-sm-offset-10 col-md-offset-10 col-sm-2 col-md-2">
+								<button type="button" class="btn btn-sm btn-block btn-success"
+									ng-click="saveAlgParam()">
+									<span class="glyphicon glyphicon-floppy-disk"
+										aria-hidden="true"></span> 保存参数
+								</button>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!--
+	<script type="text/javascript">
+    parent.$("#dmp-breadcrumb").css("display","none");
+</script>-->
+</body>
+</html>

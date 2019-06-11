@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html ng-app="indexApp">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <!--<link href="css/bootstrap-theme.css" rel="stylesheet">-->
+    <link href="css/jquery-ui.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+    <script src="js/angular/1.6.3/angular.js"></script>
+    <script src="js/angular/1.6.3/angular-route.js"></script>
+    <script src="js/angular/1.6.3/angular-ui-router.js"></script>
+    <script src="js/angular/1.6.3/angular-file-upload.js"></script>
+    <script src="js/jquery-2.1.4.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/jquery-ui.js"></script>
+    <script src="js/ie10-viewport-bug-workaround.js"></script>
+    <script src="js/ie-emulation-modes-warning.js"></script>
+    <script src="ng/indexApp.js"></script>
+    <script src="ng/subjectCtrl.js"></script>
+    <title>创建主题库</title>
+</head>
+<body ng-controller="subjectCtrl">
+<div class="container-fluid">
+    <h3 class="page-header">创建主题库
+        <a type="button"
+           class="btn btn-info btn-sm btn-block"
+           style="float: right; width: 10%"
+           href="data-computing.html">返回数据计算
+        </a>
+    </h3>
+
+    <div class="row">
+        <div class="col-sm-8 col-md-8">
+            <div class="alert alert-info alert-dismissible" role="alert">
+                <button type="button" class="close" data-dismiss="alert"
+                        aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <strong>说 明</strong> 基于现有关联数据表，生成包含指定字段的主题数据表
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12 col-md-12">
+            <div class="panel panel-default" style="background-color: #2d5f8b">
+                <div class="panel-body">
+                    <form class="form-horizontal">
+                        <div class="form-group form-group-sm">
+                            <div class="col-sm-4 col-md-4">
+                                <input type="text" class="form-control" id="taskName"
+                                       placeholder="主题数据库名称" ng-model="subjectConfig.subjectSchame">
+                            </div>
+                            <div class="col-sm-4 col-md-4">
+                                <input type="text" class="form-control" id="taskCreator"
+                                       placeholder="主题表名称" ng-model="subjectConfig.subjectTable">
+                            </div>
+                            <div class="col-sm-4 col-md-4">
+                                <input type="text" class="form-control" id="tasknum"
+                                       placeholder="任务编号" ng-model="subjectConfig.subjectUUID" readonly="readonly">
+                            </div>
+                        </div>
+                        <div class="form-group form-group-sm">
+                            <div class="col-sm-4 col-md-4">
+                                <input type="text" class="form-control" id="taskCreator11"
+                                       placeholder="主题库描述（可选）" ng-model="subjectConfig.subjectDescription">
+                            </div>
+                            <div class="col-sm-4 col-md-4">
+                                <input type="text" class="form-control" id="taskCreator12"
+                                       placeholder="主题表描述（可选）" ng-model="subjectConfig.subjectTableDescription">
+                            </div>
+                            <div class="col-sm-2 col-md-2">
+                                <button type="button" class="btn btn-sm btn-block btn-success" ng-disabled="!subjectConfig.subjectSchame || !subjectConfig.subjectTable"
+                                        ng-click="createSubjectDescription();getUUID()">
+                                    生成任务 <span class="glyphicon glyphicon-send" aria-hidden="true"></span>
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12 col-md-12">
+            <div class="panel panel-primary">
+                <div class="panel-heading">主题表配置</div>
+                <div class="panel-body">
+
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="panel panel-default">
+                                <div class="panel-heading">选择基础库</div>
+                                <div class="panel-body">
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <select ng-model="selectedDatabaseIndex"
+                                                    ng-init="selectedDatabaseIndex = '0'"
+                                                    class="form-control" style="width: 100%;">
+                                                <option ng-repeat="x in dbInfoList" value="{{$index}}">{{x}}</option>
+                                            </select>
+
+                                        </div>
+                                        <div class="col-md-2">
+                                            <button type="button"
+                                                    class="btn btn-primary btn-sm btn-block"
+                                                    ng-click="connectMySQL();listMySQLTables()">连接数据源
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row" ng-show="mysqlDbInfoVisible">
+                        <div class="col-md-12">
+                            <div class="panel panel-default">
+                                <div class="panel-heading">选择表</div>
+                                <div class="panel-body">
+                                    <div class="row">
+                                        <div class="col-md-8">
+                                            <!--
+                                            <ul class="nav nav-tabs">
+                                                <li ng-repeat="(key, value) in tableMeta" ng-class="currentMySQLTable == key ? '' : 'active'"
+                                                ng-if="value != '' && value != null">
+                                                    <a href ng-click="showTableInfo(key)">{{value}}</a>
+                                                </li>
+                                            </ul>
+                                            -->
+
+                                            <select ng-model="currentMySQLTable" ng-init="currentMySQLTable = ''"
+                                                    class="form-control" style="width: 100%;"
+                                                    ng-change="showTableInfo(currentMySQLTable)">
+                                                <option ng-repeat="(key, value) in tableMeta" value="{{key}}"
+                                                        ng-if="value != '' && value != null"
+                                                >{{value}}
+                                                </option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <div class="table-responsive">
+                                                <table class="table table-bordered table-condensed table-hover">
+                                                    <caption>数据表 {{currentMySQLTable}} 的数据样例</caption>
+                                                    <thead>
+                                                    <tr>
+                                                        <th>No</th>
+
+                                                        <th ng-repeat="(key, value) in currentMySQLTableColumnName"
+                                                            ng-style="{'background-color':isSelected(key) ?'#aad3ff':''}"
+                                                            style="min-width: 80px;max-width:300px;word-wrap: break-word">
+                                                            {{currentMySQLTableColumnName[key]}}
+                                                        </th>
+
+                                                    </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                    <tr ng-repeat="item in mysqlTableSampleData">
+                                                        <td>{{$index+1}}</td>
+                                                        <td ng-repeat="(key, value) in currentMySQLTableColumnName"
+                                                            ng-style="{'background-color':isSelected(key) ?'#aad3ff':''}"
+                                                            style="min-width: 80px;max-width:300px;word-wrap: break-word">
+                                                            {{item[key]|limitTo:10}}
+                                                        </td>
+                                                    </tr>
+                                                    <tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row" ng-show="mysqlDbTableInfoVisible">
+                        <div class="col-md-12">
+                            <div class="panel panel-default">
+                                <div class="panel-heading">选择数据项</div>
+                                <div class="panel-body">
+
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <div class="table-responsive">
+                                                <table class="table table-bordered table-condensed table-hover">
+                                                    <caption>数据表 {{currentMySQLTable}} 的结构</caption>
+                                                    <thead>
+                                                    <tr>
+                                                        <!--<th>No</th>-->
+                                                        <th></th>
+                                                        <th ng-repeat="(key, value) in currentMySQLTableColumnName"
+                                                            ng-style="{'background-color':isSelected(key) ?'#aad3ff':''}"
+                                                            style="white-space:nowrap">
+                                                            <input id="{{key}}" name="{{key}}" type="checkbox"
+                                                                   ng-checked="isSelected(key)"
+                                                                   ng-click="updateSelection($event,key,'selected')" ng-model="checkflag1"/>
+                                                            {{currentMySQLTableColumnName[key]}}
+                                                        </th>
+                                                    </tr>
+                                                    <!--
+                                                    <tr>
+                                                        <th>标识字段</th>
+                                                        <th ng-repeat="(key, value) in currentMySQLTableColumnName"
+                                                            style="white-space:nowrap">
+                                                            <input type="radio" name="primaryKey" ng-init="$index==0? initPrimaryKey(key) : ''"
+                                                                 ng-checked="$index==0"
+                                                                 ng-click="updateSelection($event,key,'primaryKey')"/>
+                                                        </th>
+
+                                                    </tr>
+                                                    -->
+                                                    </thead>
+                                                    <tbody>
+                                                    <tr>
+                                                        <td>字段名</td>
+                                                        <td ng-repeat="(key, value) in currentMySQLTableColumnName"
+                                                            ng-style="{'background-color':isSelected(key) ?'#aad3ff':''}">
+                                                            {{key}}
+                                                        </td>
+                                                    </tr>
+
+                                                    <tr>
+                                                        <td>列数据类型</td>
+                                                        <td ng-repeat="(key, value) in currentMySQLTableColumnName"
+                                                            ng-style="{'background-color':isSelected(key) ?'#aad3ff':''}">
+                                                            {{currentMySQLTableDesc[key]}}
+                                                        </td>
+                                                    </tr>
+
+                                                    <tbody>
+
+                                                </table>
+                                            </div>
+                                            <!--
+                                            <pre>{{selectedTagsString}}</pre>
+                                            <pre>{{selected|json}}</pre>
+                                            <pre>{{selectedTags|json}}</pre>
+                                             -->
+                                        </div>
+
+
+                                    </div>
+
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="panel panel-default">
+                                <div class="panel-heading">当前表选中构成主题表字段</div>
+                                <div class="panel-body">
+                                    <div class="form-group">
+                                        <table class="table table-bordered table-condensed table-hover">
+                                            <th style="white-space:nowrap">选中字段</th>
+                                            <th style="white-space:nowrap">数据表</th>
+                                            <th style="white-space:nowrap">设置为关联字段</th>
+                                            <th style="white-space:nowrap">操作</th>
+                                            <tr ng-repeat="x in sourceFieldList">
+                                                <td>{{x}}</td>
+                                                <td>{{currentMySQLTable}}</td>
+                                                <td>
+                                                    <input id="{{x}}" name="{{x}}" type="checkbox"
+                                                           ng-click="updateKeys($event,x)" ng-model="checkflag2"
+                                                    />
+                                                </td>
+                                                <td>
+                                                    <button type="buttonshuax" class="btn btn-sm btn-danger"
+                                                            ng-click="deleteItem(x)">
+                                                        删除字段
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                        <button type="button" class="btn btn-sm btn-primary"
+                                                ng-click="switchTable()" ng-disabled="!checkflag1 || !checkflag2">
+                                            确认选中
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="panel panel-default">
+                                <div class="panel-heading">已选中字段</div>
+                                <div class="panel-body">
+                                    <div class="form-group">
+                                        <table class="table table-bordered table-condensed table-hover">
+                                            <th style="white-space:nowrap">数据源名</th>
+                                            <th style="white-space:nowrap">数据表名</th>
+                                            <th style="white-space:nowrap">原字段名</th>
+                                            <th style="white-space:nowrap">是否关联字段</th>
+                                            <th style="white-space:nowrap">新字段名</th>
+                                            <tr ng-repeat="x in listItemSum">
+
+                                                <td>{{x.SourceId}}</td>
+                                                <td>{{x.Sourcetable}}</td>
+                                                <td>{{x.field}}</td>
+                                                <td>{{x.iskeys}}</td>
+                                                <td>{{x.nowField}}</td>
+                                            </tr>
+                                        </table>
+                                        <div class="col-sm-1 col-md-1">
+                                        <button type="button" class="btn btn-sm btn-danger"
+                                                ng-click="deleteAll()">
+                                            清空
+                                        </button>
+                                        </div>
+                                        <div class="col-sm-4 col-md-4">
+                                            <input type="text" class="form-control" id="taskCreator1"
+                                                   placeholder="设置主题表最大行数" ng-model="subjectConfig.limites">
+                                        </div>
+                                        <button type="button" class="btn btn-sm btn-success"
+                                                ng-click="preCalculate()" ng-disabled="!subjectConfig.subjectSchame || !subjectConfig.subjectTable || !subjectConfig.subjectDescription || !subjectConfig.subjectTableDescription ||!subjectConfig.limites">
+                                            生成主题表
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row" ng-show="targetTableInfoVisible">
+                        <div class="col-md-12">
+                            <div class="panel panel-default">
+                                <div class="panel-heading">主题表生成进度</div>
+                                <div class="panel-body">
+                                    <div class="form-group">
+                                        <div class="progress">
+                                            <div ng-class="{progress: true, 'progress-striped': 'true'}">
+                                                <div ng-class="['progress-bar', 'progress-bar-success']" ng-style="{width: vmvalue + '%'}">
+                                                    <div ng-if="true">{{vmvalue}}%</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row" ng-show="targetTableInfoVisible2">
+                        <div class="col-md-12">
+                            <div class="panel panel-default">
+                                <div class="panel-heading">查看主题表数据集</div>
+                                <div class="panel-body">
+
+                                    <div class="form-group">
+
+                                            <textarea class="form-control" id="textarea-sql" rows="2"
+                                                      placeholder="数据库查询SQL语句，用于数据集的生成"
+                                                      ng-model="sqlStatement"
+                                                      ng-change="hideTables()" readonly="readonly"></textarea>
+                                    </div>
+                                    <div class="form-group">
+                                        <button type="button" class="btn btn-sm btn-primary"
+                                                ng-click="showTableInfo(subjectConfig.subjectTable);getTargetMySQLTableSampleData()">
+                                            显示数据集样例
+                                        </button>
+                                    </div>
+
+                                    <div class="row" ng-show="targetTableInfoVisible1">
+                                        <div class="col-sm-12 col-md-12">
+                                            <div class="table-responsive">
+                                                <table class="table table-bordered table-condensed table-hover">
+                                                    <caption>基于自定义字段的主题表 {{currentMySQLTable}}
+                                                        的数据集样例
+                                                    </caption>
+
+                                                    <thead>
+                                                    <tr ng-if="selected.length != 0">
+                                                        <th ng-repeat="column in selected"
+                                                            style="min-width: 80px;max-width:300px;word-wrap: break-word">
+                                                            {{currentMySQLTableColumnName[column]}}
+                                                        </th>
+                                                    </tr>
+                                                    <tr ng-if="selected.length == 0">
+                                                        <th ng-repeat="(key, value) in currentMySQLTableColumnName"
+                                                            style="min-width: 80px;max-width:300px;word-wrap: break-word">
+                                                            {{currentMySQLTableColumnName[key]}}
+                                                        </th>
+                                                    </tr>
+                                                    </thead>
+
+                                                    <tbody>
+                                                    <tr ng-repeat="item in mysqlTableSampleDataBySQL">
+                                                        <td ng-repeat="(key, value) in item"
+                                                            style="min-width: 80px;max-width:300px;word-wrap: break-word">
+                                                            {{value|limitTo:10}}
+                                                        </td>
+                                                    </tr>
+                                                    <tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+</body>
+</html>
