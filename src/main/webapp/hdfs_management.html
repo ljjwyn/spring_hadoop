@@ -24,6 +24,7 @@
     <script src="js/angular/1.6.3/angular-ui-router.js"></script>
     <script src="js/angular/1.6.3/angular-file-upload.js"></script>
     <script src="js/jquery-2.1.4.min.js"></script>
+    <script src="js/dark.js"></script>
     <script src="js/bootstrap.min.js"></script>
     <script src="js/jquery-ui.js"></script>
     <script src="js/sweetalert.min.js"></script>
@@ -299,8 +300,77 @@
                 </div>
             </div>
         </div>
+    <div class="row" ng-show="linerRegresion">
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">线性回归</div>
+                <div class="panel-body">
+                    <div class="form-group form-group-sm" >
+                        <div>
+                            <label
+                                    class="col-sm-2">线性回归配置</label>
+                            <div class="col-md-3">
+                                <input type="text" class="form-control"
+                                       placeholder="迭代次数" ng-model="kmeansCall.iteration">
+                            </div>
+                            <div class="col-md-3">
+                                <button type="button"
+                                        class="btn btn-info btn-sm"
+                                        ng-click="LinerR()">Liner回归
+                                </button>
+                                <button type="button"
+                                        class="btn btn-info btn-sm"
+                                        ng-click="LassoR()">Lasso回归
+                                </button>
+                                <button type="button"
+                                        class="btn btn-info btn-sm"
+                                        ng-click="RidgeR()">Ridge回归
+                                </button>
+                            </div>
+                            <div class="col-md-2" style="margin-top: 10px;float: right;">
+                                <label style="margin-top: 5px">Liner回归均方差损失</label>
+                                <input type="text" class="form-control"
+                                       placeholder="损失(cost)" ng-model="kmeansCost" readonly>
+                                <label style="margin-top: 5px">Lasso回归均方差损失</label>
+                                <input type="text" class="form-control"
+                                       placeholder="损失(cost)" ng-model="kmeansCost" readonly>
+                                <label style="margin-top: 5px">Ridge回归均方差损失</label>
+                                <input type="text" class="form-control"
+                                       placeholder="损失(cost)" ng-model="kmeansCost" readonly>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-12" style="margin-top: 10px">
+                        <div class="col-md-6">
+                            <div class="panel panel-default">
+                                <div class="panel-heading">
+                                    预测图展示
+                                </div>
+                                <div id="linerChart1" style="width: 550px;height:400px;" ></div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="panel panel-default">
+                                <div class="panel-heading">
+                                    预测图展示
+                                </div>
+                                <div id="linerChart2" style="width: 550px;height:400px;" ></div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="panel panel-default">
+                                <div class="panel-heading">
+                                    预测图展示
+                                </div>
+                                <div id="linerChart3" style="width: 550px;height:400px;" ></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-
 </div>
+
 </body>
 </html>

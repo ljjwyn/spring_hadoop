@@ -1,10 +1,12 @@
 package com.lijiajie.springhadoop.spring_hadoop.spark;
 
 import com.lijiajie.springhadoop.spring_hadoop.entity.kmeans;
+import com.lijiajie.springhadoop.spring_hadoop.entity.linearRegresion;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
+import org.apache.spark.broadcast.Broadcast;
 import org.apache.spark.mllib.linalg.Vector;
 import org.apache.spark.mllib.linalg.Vectors;
 import org.apache.spark.mllib.recommendation.MatrixFactorizationModel;
@@ -74,7 +76,8 @@ public class connect_scala_java {
         return res;
     }
 
-    public void LinearRegresion(){
+    public linearRegresion LinearRegresion(int flag){
+        linearRegresion lr =new linearRegresion();
         SparkConf sparkConf = new SparkConf().setAppName("LinearRegresion").setMaster("local[*]");
         JavaSparkContext sc =  new JavaSparkContext(sparkConf);
         //原始的数据-0.4307829,-1.63735562648104 -2.00621178480549 ...
@@ -100,17 +103,33 @@ public class connect_scala_java {
         LinearRegressionModel linearModel = LinearRegressionWithSGD.train(parsedData.rdd(), numIterations);
         RidgeRegressionModel ridgeModel = RidgeRegressionWithSGD.train(parsedData.rdd(), numIterations);
         LassoModel lassoModel = LassoWithSGD.train(parsedData.rdd(), numIterations);
+        HashMap<String,HashMap<Double,Double>> res=new HashMap<>();
+        HashMap<Double, Double> liner=new HashMap<>();
+        HashMap<Double, Double> ridge=new HashMap<>();
+        HashMap<Double, Double> lasso=new HashMap<>();
         //打印信息
-        print(parsedData, linearModel);
-        print(parsedData, ridgeModel);
-        print(parsedData, lassoModel);
-
+        List<Double> realD=new ArrayList<>();
+        List<Double> preD=new ArrayList<>();
+        if (flag==1){
+            liner=print(parsedData, linearModel, sc);
+        }else if(flag==2){
+            liner=print(parsedData, ridgeModel, sc);
+        }else {
+            liner=print(parsedData, lassoModel, sc);
+        }
+        for(Double tempD:liner.keySet()){
+            realD.add(tempD);
+            preD.add(liner.get(tempD));
+        }
+        lr.setPredictData(preD);
+        lr.setRealData(realD);
+        lr.setLinerCost(0.0);
         //预测一条新数据方法，8个特征值
-        double[] d = new double[]{1.0, 1.0, 2.0, 1.0, 3.0, -1.0, 1.0, -2.0};
+        /*double[] d = new double[]{1.0, 1.0, 2.0, 1.0, 3.0, -1.0, 1.0, -2.0};
         Vector v = Vectors.dense(d);
         System.out.println("Prediction of linear: "+linearModel.predict(v));
         System.out.println("Prediction of ridge: "+ridgeModel.predict(v));
-        System.out.println("Prediction of lasso: "+lassoModel.predict(v));
+        System.out.println("Prediction of lasso: "+lassoModel.predict(v));*/
 
 
 //        //保存模型
@@ -120,6 +139,7 @@ public class connect_scala_java {
 
         //关闭
         sc.close();
+        return lr;
     }
 
     /**
@@ -130,17 +150,22 @@ public class connect_scala_java {
      * @param parsedData
      * @param model
      */
-    public static void print(JavaRDD<LabeledPoint> parsedData, GeneralizedLinearModel model) {
+    public static HashMap<Double, Double> print(JavaRDD<LabeledPoint> parsedData, GeneralizedLinearModel model, JavaSparkContext sc) {
         JavaPairRDD<Double, Double> valuesAndPreds = parsedData.mapToPair(point -> {
             double prediction = model.predict(point.features()); //用模型预测训练数据
             return new Tuple2<>(point.label(), prediction);
         });
+        HashMap<Double, Double> res=new HashMap<>();
+        Broadcast<HashMap<Double, Double>> broadcast=sc.broadcast(res);
         //打印训练集中的真实值与相对应的预测值
         valuesAndPreds.foreach((Tuple2<Double, Double> t) -> {
+            broadcast.getValue().put(t._1(),t._2());
             System.out.println("训练集真实值："+t._1()+" ,预测值： "+t._2());
         });
+        System.out.println(broadcast.value());
         //计算预测值与实际值差值的平方值的均值
         Double MSE = valuesAndPreds.mapToDouble((Tuple2<Double, Double> t) -> Math.pow(t._1() - t._2(), 2)).mean();
         System.out.println(model.getClass().getName() + " training Mean Squared Error = " + MSE);
+        return broadcast.value();
     }
 }

@@ -18,6 +18,10 @@ indexApp
             var temppath=null;
             var allserval=[];
             $scope.kmeansShow=null;
+            $scope.linerRegresion=null;
+            var linerIteration={
+                Iteration:null
+            };
             var searchTask = $scope.searchTask = function () {
                 var rootRoad=null;
                 if (!$scope.searchParam) {
@@ -150,7 +154,7 @@ indexApp
 
                 var echartsWarp = document.getElementById("zcfzChart");
 
-                var myChart = echarts.init(echartsWarp);// 基于准备好的dom，初始化echarts实例
+                var myChart = echarts.init(echartsWarp,'dark');// 基于准备好的dom，初始化echarts实例
 
                 // 使用刚指定的配置项和数据显示图表。
                 myChart.setOption(option);
@@ -345,8 +349,254 @@ indexApp
 
             }
 
+            $scope.LinerR=function(){
+                var Ser=[];
+                var X=[];
+                var len=0;
+                $http({
+                    method: 'POST',
+                    url: '/hadoop/hdfs/linerRegresion',
+                    data:linerIteration,
+                }).then(function (resp, status) {
+                    console.log(resp.data);
+                    var realDatas=$scope.realdatas=resp.data.realData;
+                    console.log("realdata",realDatas);
+                    var predictData=$scope.predictdata=resp.data.predictData;
+                    console.log("predictdata",predictData);
+                    var linercost=$scope.linercost=resp.data.cost;
+                    console.log("cost",linercost);
+                    len=realDatas.length;
+                    for(var i in len){
+                        X.push(i);
+                    }
+                    var seriesR={
+                        name:'realData',
+                        type:'line',
+                        data:realDatas,
+                        markPoint : {
+                            data : [
+                                {type : 'max', name: '最大值'},
+                                {type : 'min', name: '最小值'}
+                            ]
+                        },
+                        markLine : {
+                            data : [
+                                {type : 'average', name: '平均值'}
+                            ]
+                        }
+                    };
+                    Ser.push(seriesR);
+                    var seriesP={
+                        name:'predictData',
+                        type:'line',
+                        data:predictData,
+                        markPoint : {
+                            data : [
+                                {type : 'max', name: '最大值'},
+                                {type : 'min', name: '最小值'}
+                            ]
+                        },
+                        markLine : {
+                            data : [
+                                {type : 'average', name: '平均值'}
+                            ]
+                        }
+                    };
+                    Ser.push(seriesP);
+                    $scope.linerChart(Ser,X,"LinearRegression","linerChart1");
+                    $scope.status = status;
+                }, function (resp, status) {
+                    $scope.resp = resp;
+                    $scope.status = status;
+                });
+            }
+
+            $scope.LassoR=function(){
+                var Ser=[];
+                var X=[];
+                var len=0;
+                $http({
+                    method: 'POST',
+                    url: '/hadoop/hdfs/LassoRegresion',
+                    data:linerIteration,
+                }).then(function (resp, status) {
+                    console.log(resp.data);
+                    var realDatas=$scope.realdatas=resp.data.realData;
+                    console.log("realdata",realDatas);
+                    var predictData=$scope.predictdata=resp.data.predictData;
+                    console.log("predictdata",predictData);
+                    var linercost=$scope.linercost=resp.data.cost;
+                    console.log("cost",linercost);
+                    len=realDatas.length;
+                    for(var i in len){
+                        X.push(i);
+                    }
+                    var seriesR={
+                        name:'realData',
+                        type:'line',
+                        data:realDatas,
+                        markPoint : {
+                            data : [
+                                {type : 'max', name: '最大值'},
+                                {type : 'min', name: '最小值'}
+                            ]
+                        },
+                        markLine : {
+                            data : [
+                                {type : 'average', name: '平均值'}
+                            ]
+                        }
+                    };
+                    Ser.push(seriesR);
+                    var seriesP={
+                        name:'predictData',
+                        type:'line',
+                        data:predictData,
+                        markPoint : {
+                            data : [
+                                {type : 'max', name: '最大值'},
+                                {type : 'min', name: '最小值'}
+                            ]
+                        },
+                        markLine : {
+                            data : [
+                                {type : 'average', name: '平均值'}
+                            ]
+                        }
+                    };
+                    Ser.push(seriesP);
+                    $scope.linerChart(Ser,X,"LassoRegression","linerChart2");
+                    $scope.status = status;
+                }, function (resp, status) {
+                    $scope.resp = resp;
+                    $scope.status = status;
+                });
+            }
+
+            $scope.RidgeR=function(){
+                var Ser=[];
+                var X=[];
+                var len=0;
+                $http({
+                    method: 'POST',
+                    url: '/hadoop/hdfs/RidgeRegresion',
+                    data:linerIteration,
+                }).then(function (resp, status) {
+                    console.log(resp.data);
+                    var realDatas=$scope.realdatas=resp.data.realData;
+                    console.log("realdata",realDatas);
+                    var predictData=$scope.predictdata=resp.data.predictData;
+                    console.log("predictdata",predictData);
+                    var linercost=$scope.linercost=resp.data.cost;
+                    console.log("cost",linercost);
+                    len=realDatas.length;
+                    for(var i in len){
+                        X.push(i);
+                    }
+                    var seriesR={
+                        name:'realData',
+                        type:'line',
+                        data:realDatas,
+                        markPoint : {
+                            data : [
+                                {type : 'max', name: '最大值'},
+                                {type : 'min', name: '最小值'}
+                            ]
+                        },
+                        markLine : {
+                            data : [
+                                {type : 'average', name: '平均值'}
+                            ]
+                        }
+                    };
+                    Ser.push(seriesR);
+                    var seriesP={
+                        name:'predictData',
+                        type:'line',
+                        data:predictData,
+                        markPoint : {
+                            data : [
+                                {type : 'max', name: '最大值'},
+                                {type : 'min', name: '最小值'}
+                            ]
+                        },
+                        markLine : {
+                            data : [
+                                {type : 'average', name: '平均值'}
+                            ]
+                        }
+                    };
+                    Ser.push(seriesP);
+                    $scope.linerChart(Ser,X,"RidgeRegression","linerChart3");
+                    $scope.status = status;
+                }, function (resp, status) {
+                    $scope.resp = resp;
+                    $scope.status = status;
+                });
+            }
+
+            $scope.linerChart = function (Ser,X,text,chart){
+
+                // 指定图表的配置项和数据
+                echarts.init(document.getElementById(chart),'dark').dispose();
+                var option = {
+                    title : {
+                        text: text,
+                        subtext: '线性回归'
+                    },
+                    tooltip : {
+                        trigger: 'axis'
+                    },
+                    legend: {
+                        data:['最大值','最小值']
+                    },
+                    toolbox: {
+                        show : true,
+                        feature : {
+                            mark : {show: true},
+                            dataView : {show: true, readOnly: false},
+                            magicType : {show: true, type: ['line', 'bar']},
+                            restore : {show: true},
+                            saveAsImage : {show: true}
+                        }
+                    },
+                    calculable : true,
+                    xAxis : [
+                        {
+                            type : 'category',
+                            boundaryGap : false,
+                            data : X
+                        }
+                    ],
+                    yAxis : [
+                        {
+                            type : 'value',
+                        }
+                    ],
+                    series : Ser
+                };
+
+
+                var echartsWarp = document.getElementById(chart);
+
+                var myChart = echarts.init(echartsWarp,'dark');// 基于准备好的dom，初始化echarts实例
+
+                // 使用刚指定的配置项和数据显示图表。
+                myChart.setOption(option);
+
+                window.addEventListener("resize", function () {
+                    myChart.resize();
+                });
+            };
+
             $scope.showKmeans=function () {
+                $scope.linerRegresion=false;
                 $scope.kmeansShow=true;
+            }
+
+            $scope.showLiner=function () {
+                $scope.kmeansShow=false;
+                $scope.linerRegresion=true;
             }
 
             function Map() {

@@ -16,6 +16,7 @@ import com.lijiajie.springhadoop.spring_hadoop.entity.pathInfo;
 import com.lijiajie.springhadoop.spring_hadoop.entity.kmeans;
 import com.lijiajie.springhadoop.spring_hadoop.service.HdfsService;
 import com.lijiajie.springhadoop.spring_hadoop.util.loadPathInfo;
+import com.lijiajie.springhadoop.spring_hadoop.entity.linearRegresion;
 import com.lijiajie.springhadoop.spring_hadoop.spark.SparkJob;
 import com.lijiajie.springhadoop.spring_hadoop.spark.connect_scala_java;
 
@@ -143,6 +144,42 @@ public class HdfsAction {
         connect_scala_java conn =new connect_scala_java();
         Kmeans = conn.getData(path,keys,iteration);
         return Kmeans;
+    }
+
+    @RequestMapping(value = "/LassoRegresion", method=RequestMethod.POST,
+            produces={"application/json;charset=UTF-8"})
+    public linearRegresion LassoRegresion(@RequestBody String str) throws Exception {
+        linearRegresion lr;
+        connect_scala_java csj =new connect_scala_java();
+        Map<String,HashMap<Double,Double>> res=new HashMap<>();
+        Map<String, Object> resquestParams = JSONObject.parseObject(str, Map.class);
+        String path = (String) resquestParams.get("Iteration");
+        lr=csj.LinearRegresion(1);
+        return lr;
+    }
+
+    @RequestMapping(value = "/linerRegresion", method=RequestMethod.POST,
+            produces={"application/json;charset=UTF-8"})
+    public linearRegresion linerRegresion(@RequestBody String str) throws Exception {
+        linearRegresion lr;
+        connect_scala_java csj =new connect_scala_java();
+        Map<String,HashMap<Double,Double>> res=new HashMap<>();
+        Map<String, Object> resquestParams = JSONObject.parseObject(str, Map.class);
+        String path = (String) resquestParams.get("Iteration");
+        lr=csj.LinearRegresion(2);
+        return lr;
+    }
+
+    @RequestMapping(value = "/RidgeRegresion", method=RequestMethod.POST,
+            produces={"application/json;charset=UTF-8"})
+    public linearRegresion RidgeRegresion(@RequestBody String str) throws Exception {
+        linearRegresion lr =new linearRegresion();
+        connect_scala_java csj =new connect_scala_java();
+        Map<String,HashMap<Double,Double>> res=new HashMap<>();
+        Map<String, Object> resquestParams = JSONObject.parseObject(str, Map.class);
+        String path = (String) resquestParams.get("Iteration");
+        lr=csj.LinearRegresion(3);
+        return lr;
     }
 
 
