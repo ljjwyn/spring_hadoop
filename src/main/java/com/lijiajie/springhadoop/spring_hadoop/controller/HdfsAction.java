@@ -46,6 +46,36 @@ public class HdfsAction {
     }
 
     /**
+     * 上传文件
+     * @param path
+     * @param uploadPath
+     * @return
+     * @throws Exception
+     */
+    @PostMapping("/uploadFile")
+    public String uploadFile(@RequestParam("path") String path, @RequestParam("uploadPath") String uploadPath)
+            throws Exception {
+        HdfsService.uploadFile(path, uploadPath);
+        return "upload file success";
+    }
+
+    /**
+     * 创建文件
+     * @param path
+     * @return
+     * @throws Exception
+     */
+    @PostMapping("/createFile")
+    public String createFile(@RequestParam("path") String path, @RequestParam("file") MultipartFile file)
+            throws Exception {
+        if (StringUtils.isEmpty(path) || null == file.getBytes()) {
+            return "请求参数为空";
+        }
+        HdfsService.createFile(path, file);
+        return "创建文件成功";
+    }
+
+    /**
      * 读取HDFS文件内容
      * @param str
      * @return
@@ -121,6 +151,7 @@ public class HdfsAction {
         System.out.println(testMap1);
         return resMap;
     }
+
 
     public List<Double> transformer(String a){
         a=a.replace("[","");
