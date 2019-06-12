@@ -189,32 +189,14 @@
                             </div>
                             <div id="zcfzChart" style="width: 100%;height:410px;" ></div>
                         </div>
-                        <div>
-                            <label
-                                   class="col-sm-2 control-label">K-means配置</label>
-                            <div class="col-md-3">
-                                <input type="text" class="form-control" id="currentTasktaskId"
-                                       placeholder="聚类中心" ng-model="kmeansCall.keys">
-                            </div>
-                            <div class="col-md-3">
-                                <input type="text" class="form-control" id="currentTaskname"
-                                       placeholder="迭代次数" ng-model="kmeansCall.iteration">
-                            </div>
-                            <div class="col-md-3">
-                                <button type="button"
-                                        class="btn btn-info btn-sm"
-                                        ng-click="Kmeans()">K-means分析
-                                </button>
-                            </div>
-                        </div>
                     </div>
                     <div class="col-md-6">
                         <div class="panel panel-default">
                             <div class="panel-heading">
-                                三维图解聚类
+                                结果数据集展示
                             </div>
                             <div  style="height:410px;overflow:auto;cursor:pointer">
-                                <textarea style="border:0;border-radius:5px;background-color:rgba(241,241,241,.98);width: 580px;height: 405px;padding: 10px;resize: none;" ng-model="showData" placeholder="聚类结果" maxlength="30"></textarea>
+                                <textarea style="border:0;border-radius:5px;background-color:rgba(241,241,241,.98);width: 580px;height: 405px;padding: 10px;resize: none;" ng-model="showData" placeholder="运算结果数据集" maxlength="30"></textarea>
                                 </textarea>
                             </div>
                         </div>
@@ -226,41 +208,91 @@
     <div class="row">
         <div class="col-md-12">
             <div class="panel panel-default">
-                <div class="panel-heading">任务信息</div>
+                <div class="panel-heading">算法选择</div>
                 <div class="panel-body">
-                        <div class="form-group form-group-sm">
-                            <div class="col-md-offset-2 col-md-2">
-                                <select ng-model="selectedX"
-                                        ng-init="selectedX = '0'"
-                                        class="form-control" style="width: 100%;">
-                                    <option ng-repeat="x in dbInfoList" value="{{$index}}">{{x}}</option>
-                                </select>
+                    <div class="col-md-4">
+                        <button type="button" class="btn btn-sm btn-info"
+                                ng-click="showKmeans()" >
+                            Kmeans聚类
+                        </button>
+                        <button type="button" class="btn btn-sm btn-info"
+                                ng-click="showLiner()" >
+                            线性回归
+                        </button>
+                        <button type="button" class="btn btn-sm btn-info"
+                                ng-click="closeAll()" >
+                            测试
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row" ng-show="kmeansShow">
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">聚类分析</div>
+                <div class="panel-body">
+                    <div class="form-group form-group-sm" >
+                        <div>
+                            <label
+                                    class="col-sm-2 control-label">K-means配置</label>
+                            <div class="col-md-3">
+                                <input type="text" class="form-control"
+                                       placeholder="聚类中心" ng-model="kmeansCall.keys">
                             </div>
-                            <div class="col-md-2">
-                                <select ng-model="selectedY"
-                                        ng-init="selectedY = '1'"
-                                        class="form-control" style="width: 100%;">
-                                    <option ng-repeat="x in dbInfoList" value="{{$index}}">{{x}}</option>
-                                </select>
+                            <div class="col-md-3">
+                                <input type="text" class="form-control"
+                                       placeholder="迭代次数" ng-model="kmeansCall.iteration">
                             </div>
-                            <div class="col-md-2">
-                                <select ng-model="selectedZ"
-                                        ng-init="selectedZ = '2'"
-                                        class="form-control" style="width: 100%;">
-                                    <option ng-repeat="x in dbInfoList" value="{{$index}}">{{x}}</option>
-                                </select>
-                            </div>
-                            <div class="col-md-4">
-                                <button type="button" class="btn btn-sm btn-info"
-                                        ng-click="getNewChart()" >
-                                    查看任务输出
+                            <div class="col-md-3">
+                                <button type="button"
+                                        class="btn btn-info btn-sm"
+                                        ng-click="Kmeans()">K-means分析
                                 </button>
                             </div>
                         </div>
+                        <div class="col-md-offset-2 col-md-2" style="margin-top: 5px">
+                            X轴特征维度
+                            <select ng-model="selectedX"
+                                    ng-init="selectedX = '0'"
+                                    class="form-control" style="width: 100%;">
+                                <option ng-repeat="x in dbInfoList" value="{{$index}}">{{x}}</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2" style="margin-top: 5px">
+                            Y轴特征维度
+                            <select ng-model="selectedY"
+                                    ng-init="selectedY = '1'"
+                                    class="form-control" style="width: 100%;">
+                                <option ng-repeat="x in dbInfoList" value="{{$index}}">{{x}}</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2" style="margin-top: 5px">
+                            Z轴特征维度
+                            <select ng-model="selectedZ"
+                                    ng-init="selectedZ = '2'"
+                                    class="form-control" style="width: 100%;">
+                                <option ng-repeat="x in dbInfoList" value="{{$index}}">{{x}}</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <button type="button" class="btn btn-sm btn-info" style="margin-top: 23px"
+                                    ng-click="getNewChart()" >
+                                查看聚类三维图
+                            </button>
+                        </div>
+                    </div>
+                    <label
+                            class="col-sm-2 control-label" style="margin-top: 15px" >k-means损失</label>
+                    <div class="col-md-3" style="margin-top: 10px">
+                        <input type="text" class="form-control"
+                               placeholder="损失(cost)" ng-model="kmeansCost" readonly>
+                    </div>
                 </div>
                 <div class="panel panel-default">
                     <div class="panel-heading">
-                        内容
+                        三维图展示
                     </div>
                         <div id="3DChart" style="width: 100%;height:500px;" ></div>
                     </div>

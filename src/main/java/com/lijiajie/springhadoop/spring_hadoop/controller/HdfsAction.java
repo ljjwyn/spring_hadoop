@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.lijiajie.springhadoop.spring_hadoop.entity.pathInfo;
+import com.lijiajie.springhadoop.spring_hadoop.entity.kmeans;
 import com.lijiajie.springhadoop.spring_hadoop.service.HdfsService;
 import com.lijiajie.springhadoop.spring_hadoop.util.loadPathInfo;
 import com.lijiajie.springhadoop.spring_hadoop.spark.SparkJob;
@@ -131,7 +132,8 @@ public class HdfsAction {
 
     @RequestMapping(value = "/Kmeans", method=RequestMethod.POST,
             produces={"application/json;charset=UTF-8"})
-    public Map<List<Double>,String> Kmeans(@RequestBody String str) throws Exception {
+    public kmeans Kmeans(@RequestBody String str) throws Exception {
+        kmeans Kmeans=new kmeans();
         Map<String, Object> res = new HashMap<>();
         Map<String, Integer> wordConut = new HashMap<>();
         Map<String, Object> resquestParams = JSONObject.parseObject(str, Map.class);
@@ -139,32 +141,10 @@ public class HdfsAction {
         String keys=(String) resquestParams.get("keys");
         String iteration=(String) resquestParams.get("iteration");
         connect_scala_java conn =new connect_scala_java();
-        //HashMap<String, String> testMap = conn.getcenter();
-        HashMap<String, String> testMap1 = conn.getData(path,keys,iteration);
-        Map<List<Double>,String> resMap=new HashMap<>();
-        for(String key:testMap1.keySet()){
-            List<Double> temp=transformer(key);
-            resMap.put(temp,testMap1.get(key));
-        }
-        //HashMap<String, String> testMap2 = conn.RecommendMovies();
-        //HashMap<String, String> testMap3 = conn.RecommandUsers();
-        System.out.println(testMap1);
-        return resMap;
+        Kmeans = conn.getData(path,keys,iteration);
+        return Kmeans;
     }
 
-
-    public List<Double> transformer(String a){
-        a=a.replace("[","");
-        a=a.replace("]","");
-        String[] b=a.split(",");
-        List<Double> res=new ArrayList<>();
-        for (String S:b){
-            Double temp=0.0;
-            temp=Double.parseDouble(S);
-            res.add(temp);
-        }
-        return res;
-    }
 
     public Map<String,Integer> sort(Map<String,Integer> wordConut){
         Map<String,Integer> res=new LinkedHashMap<>();

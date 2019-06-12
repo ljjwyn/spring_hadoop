@@ -17,6 +17,7 @@ indexApp
             var Cult=null;
             var temppath=null;
             var allserval=[];
+            $scope.kmeansShow=null;
             var searchTask = $scope.searchTask = function () {
                 var rootRoad=null;
                 if (!$scope.searchParam) {
@@ -167,6 +168,7 @@ indexApp
             }
 
             $scope.Kmeans=function(){
+                var centerServal=[];
                 allserval=[];
                 $scope.kmeansCall.path=request.path;
                 $http({
@@ -175,7 +177,9 @@ indexApp
                     data:$scope.kmeansCall,
                 }).then(function (resp, status) {
                     console.log('kmeansData',resp.data);
-                    $scope.KmeansData=resp.data;
+                    $scope.KmeansData=resp.data.kmeansDatas;
+                    $scope.KmeansCenters=resp.data.kmeansCenters;
+                    $scope.kmeansCost=resp.data.cost;
                     var keyNum=parseInt($scope.kmeansCall.keys);
                     var dataMap=new Map();
                     var dimnum;
@@ -188,6 +192,46 @@ indexApp
                     console.log('dim',dimnum);
                     for(var num=1;num<=dimnum;num++){
                         $scope.dbInfoList.push("第"+num+"维特征");
+                    }
+                    for(var i in $scope.KmeansCenters){
+                        var centerList=[];
+                        var serval={
+                            type: 'scatter3D',
+                            dimensions: ['a', 'b', 'c'//显示框信息
+                            ],
+//                encode: {
+////                    x: [3, 1, 5],      // 表示维度 3、1、5 映射到 x 轴。
+////                    y: 2,              // 表示维度 2 映射到 y 轴。
+//                    tooltip:['a','c','b'], // 表示维度 3、2、4 会在 tooltip 中显示。
+//                    label: 'a'           // 表示 label 使用维度 3。
+//                },
+                            data: null,
+                            symbolSize: 10,//点的大小
+                            // symbol: 'triangle',
+                            itemStyle: {
+                                borderWidth: 50,
+                                borderColor: 'rgba(255,255,255,0.8)'//边框样式
+                            },
+                            emphasis: {
+                                itemStyle: {
+                                    color: '#ccc'//高亮
+                                }
+                            },
+                            itemStyle: {
+                                color: '#ffee00'
+                            }
+                        };
+                        var templist=[];
+                        i=i.replace('[','');
+                        i=i.replace(']','');
+                        i=i.split(", ");
+                        templist.push(i[$scope.selectedX]);
+                        templist.push(i[$scope.selectedY]);
+                        templist.push(i[$scope.selectedZ]);
+                        console.log(templist);
+                        centerList.push(templist);
+                        serval.data=centerList;
+                        centerServal.push(serval);
                     }
                     for(var j=0;j<keyNum;j++){
                         var serval={
@@ -236,6 +280,7 @@ indexApp
                         $scope.allData.push(allData0);
                         dataMap.put(j.toString(),allData0)
                     }
+                    allserval=allserval.concat(centerServal);
                     console.log('kmeansData',$scope.allData);
                     console.log("alls",allserval);
                     $scope.get3dchart();
@@ -299,6 +344,11 @@ indexApp
                 },true);
 
             }
+
+            $scope.showKmeans=function () {
+                $scope.kmeansShow=true;
+            }
+
             function Map() {
                 /** 存放键的数组(遍历用到) */
                 this.keys = new Array();

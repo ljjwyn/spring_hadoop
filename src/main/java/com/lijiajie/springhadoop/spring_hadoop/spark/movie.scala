@@ -91,7 +91,7 @@ class movie {
   }
 
 
-  def k_means(path:String, keys:String, iteration:String):(java.util.HashMap[String,String],java.util.HashMap[String,String])={
+  def k_means(path:String, keys:String, iteration:String):(java.util.HashMap[String,String],java.util.HashMap[String,String],String)={
     val conf = new SparkConf()
     conf.setMaster("local").setAppName("K-Means 1")
     val sc = new SparkContext(conf)
@@ -111,7 +111,7 @@ class movie {
     var javaScores = new java.util.HashMap[String,String]()
     val ScoresBroadCast = sc.broadcast(javaScores)
     var i=1;
-    kMeansModel.clusterCenters.foreach {V=>println;ScoresBroadCast.value+=(i.toString->V.toString);i+=1;}
+    kMeansModel.clusterCenters.foreach {V=>println;ScoresBroadCast.value+=(V.toString->i.toString);i+=1;}
     val kMeansCost = kMeansModel.computeCost(allData)
     // 输出本次聚类操作的收敛性，此值越低越好
     println("K-Means Cost: " + kMeansCost)
@@ -130,7 +130,7 @@ class movie {
     System.out.print(maps)
     System.out.print(javaScores)
     sc.stop()
-    (maps,javaScores)
+    (maps,javaScores,kMeansCost.toString)
   }
 
 }
